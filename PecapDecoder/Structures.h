@@ -128,6 +128,7 @@ typedef struct tcpHeader
 #define TH_ECE 0x40
 #define TH_CWR 0x80
 #define TH_SYN_ACK 0x12
+#define TH_FYN_AKW 0x11
 
 #define TH_FLAGS (TH_FIN|TH_SYN|TH_RST|TH_ACK|TH_URG|TH_ECE|TH_CWR)
     u_short Window;		/* window */
@@ -150,7 +151,7 @@ typedef struct sessionInfo {
         int Rx;
         int Tx;
         int packetCount;
-        string transportProtocol;   
+        string transportProtocol;
         sessionInfo(string cIP,string sIP,string sPort,string cPort,int x, int y,string protocol){
             clientIP=cIP;
             serverIP=sIP;

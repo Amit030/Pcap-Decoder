@@ -19,7 +19,7 @@ using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[]){
 
-	string filePath ="D:\\InputMaven\\RAW\\1_0\\SamePacket.pcap";
+	string filePath ="D:\\InputMaven\\RAW\\1_0\\NewPacket.pcap";
 	CPcapManager *manager= new CPcapManager();
 	
      manager->readPcapFile(filePath);

@@ -37,18 +37,18 @@ class CPcapManager{
     CInternetVersion *ipVersion;
     CTCP *tcpHeader;
     CUDP *udpHeader;
-     ofstream file;
+    ofstream file;
     void showLogs();
     int getSeekLength();
     int getSeekLengthUdp();
     void Test();
     void  writePacket();
     void dumpDataInFile();
-    // string convertToString(u_short a);
-    // template function
+    void  writeAndRemoveSession(string key);
     template <class T>
     string convertToString( T a);
     string generateKey();
+
 public:
     CPcapManager();
     void readPcapFile(string path);
