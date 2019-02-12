@@ -6,13 +6,15 @@
 
 
 class CInternetVersion{
-ipv4Header *ipHeader;
+
+ipv4Header *m_pIPV4Header;
 public:
 	CInternetVersion();
+    ~CInternetVersion();
 	void parseIPV4Header(fstream *file);
 	ipv4Header * getIPV4header();
     void showInternetVersionData();
-	~CInternetVersion();
+
 
 };
 

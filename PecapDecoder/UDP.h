@@ -6,7 +6,7 @@
 
 class CUDP{
 
-    updHeader *m_udpHeader;
+    updHeader *m_pUdpHeader;
     int m_dataSize;
     string m_packData;
 public:

@@ -15,6 +15,8 @@ typedef signed int gint32;
 typedef unsigned short u_short;
 typedef unsigned int guint32;
 typedef unsigned char u_char;
+
+
 using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[]){

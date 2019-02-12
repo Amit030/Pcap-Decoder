@@ -6,14 +6,15 @@
 
 
 class CLayerOneParser{
- struct globalHeader *gHeader;
+ struct globalHeader *m_pGlobalHeader;
 
 public:
 	CLayerOneParser();
+    ~CLayerOneParser();
 	void performLevelOneParsing(fstream *file, int * pos);
 	globalHeader *getGlobalHeader();
     void showLayerOneData();
-	~CLayerOneParser();
+	
 
 };
 

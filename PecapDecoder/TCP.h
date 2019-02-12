@@ -7,7 +7,7 @@
 using namespace std;
 
 class CTCP{
-    tcpHeader *m_tcpHeader;
+    tcpHeader *m_pTcpHeader;
     int m_headerLen;
     int m_dataSize;
     string m_packData;

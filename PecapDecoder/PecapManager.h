@@ -25,10 +25,10 @@ using namespace std;
 
 class CPcapManager{  
 
-    fstream *m_file;
+    fstream *m_pFile;
     int m_offset;
     string outputPath;
-    int m_sessionCounter;  vector<string>* m_filesInDir;
+    int m_sessionCounter;  vector<string>* m_pFilesInDir;
     unordered_map<string, sessionInfo> m_sessionMap; 
     unordered_map<std::string, sessionInfo>::const_iterator itr;
     CLayerOneParser *m_layerOneParser;
@@ -54,8 +54,9 @@ class CPcapManager{
 
 public:
     CPcapManager();
-    void readPcapFile(string path,string outpath);
     ~CPcapManager();
+    void readPcapFile(string path,string outpath);
+    
 
 };
 

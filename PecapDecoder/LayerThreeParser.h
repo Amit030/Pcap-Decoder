@@ -12,11 +12,12 @@
 
 
 class CLayerThreeParser{
-	etherHeader *m_ethHeader;
+	etherHeader *m_pEtherHeader;
 	Linux_cooked_capture *linuxHeader;
 public:
 
 	CLayerThreeParser();
+    ~CLayerThreeParser();
 	void performLevelThreeParsing(fstream *file,u_int linkType,int * pos);
     void showLayerThreeData();
 	etherHeader* getEtherHeader();

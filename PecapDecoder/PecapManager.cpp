@@ -1,11 +1,20 @@
 #include "stdafx.h"
 #include"PecapManager.h"
 
+
+
+
+/**
+* Function       :  CPcapManager::CPcapManager
+* Description    :  Default Constructor/ initializing the heades and member variables
+* Arguments      :  None
+* Return-type    :  Node 
+*/
 CPcapManager::CPcapManager(){
     m_offset=0;
     m_sessionCounter=0;
-    m_file= new fstream();
-    m_filesInDir = new vector<string>;
+    m_pFile= new fstream();
+    m_pFilesInDir = new vector<string>;
     m_layerOneParser= new CLayerOneParser();
     m_layerTwoParser= new CLayerTwoParser();
     m_layerThreeParser = new CLayerThreeParser();
@@ -16,6 +25,23 @@ CPcapManager::CPcapManager(){
 
 }
 
+
+/**
+* Function       :  CPcapManager::~CPcapManager
+* Description    :  Destructor/De-intilization
+* Arguments      :  None
+* Return-type    :  Node 
+*/
+CPcapManager::~CPcapManager(){
+    delete m_pFile;
+    delete m_pFilesInDir;
+    delete m_layerOneParser;
+    delete  m_layerTwoParser;
+    delete m_layerThreeParser;
+    delete  ipVersion;
+    delete tcpHeader;
+    delete udpHeader;
+}
 
 /**
 * Function         :   CPcapManager :: readPcapFile
@@ -29,21 +55,21 @@ void CPcapManager::readPcapFile(string path,string outpath){
     createOutputDir(outpath);
     get_all_files_names_within_folder(path);
     int count =1;
-    for (auto i = m_filesInDir->begin(); i != m_filesInDir->end(); ++i){
+    for (auto i = m_pFilesInDir->begin(); i != m_pFilesInDir->end(); ++i){
         cout<<"\n\nReading file  : "<< count << endl<<endl;
         cout<<"Current File Name : "<<*i<<endl;
 
         string filePath = path+"\\"+ *i;
         cout<<"\nPath of packet : "<<filePath<<endl;
-        m_file->open(filePath, ios::in | ios::binary);
-        if( !m_file->is_open()) {
+        m_pFile->open(filePath, ios::in | ios::binary);
+        if( !m_pFile->is_open()) {
             cout<<"Not able to read specified file"<<endl;
             getchar();
         }else{
             parsePecapFile();
         }
 
-        m_file->close();count++;
+        m_pFile->close();count++;
          dumpDataInFile();
     }
 
@@ -51,6 +77,14 @@ void CPcapManager::readPcapFile(string path,string outpath){
   
     return;
 }
+
+
+/**
+* Function         :   CPcapManager ::createOutputDir
+* Description      :   create a dir at the mentioned path in fun arg
+* Arguments        :   string : output dir path
+* Return-type      :   void
+*/
 void CPcapManager ::createOutputDir(string outpath){
     std::wstring widestr = std::wstring(outpath.begin(), outpath.end());
     CreateDirectory(widestr.c_str(), NULL);
@@ -67,36 +101,36 @@ void CPcapManager ::createOutputDir(string outpath){
 
 void CPcapManager ::parsePecapFile(){
     //Read global header
-    m_file->seekg(0,ios::end);
-    long l_fileSize=m_file->tellg();
-    m_file->seekg(0,ios::beg);
-    m_layerOneParser->performLevelOneParsing(m_file,& m_offset);
+    m_pFile->seekg(0,ios::end);
+    long l_fileSize=m_pFile->tellg();
+    m_pFile->seekg(0,ios::beg);
+    m_layerOneParser->performLevelOneParsing(m_pFile,& m_offset);
 
     int count=0;
     while(   m_offset <l_fileSize  ){
 
-        m_file->seekg(m_offset ,ios::beg);
-        if(m_file->tellg() >= 0)
+        m_pFile->seekg(m_offset ,ios::beg);
+        if(m_pFile->tellg() >= 0)
         {
             count++;
-            m_layerTwoParser->performLevelTwoParsing(m_file,
+            m_layerTwoParser->performLevelTwoParsing(m_pFile,
                 &m_offset); 
             
             m_layerThreeParser->performLevelThreeParsing(
-                m_file,
+                m_pFile,
                 m_layerOneParser->getGlobalHeader()->linktype,
                 &m_offset); 
 
             unsigned short frameType=m_layerThreeParser->getEtherHeader()->FrameType;
             if(frameType != 0xdd86)
-                ipVersion->parseIPV4Header(m_file);
+                ipVersion->parseIPV4Header(m_pFile);
             else
                 continue;
             if(ipVersion->getIPV4header()->Protocol==IPPROTO_TCP)
-                tcpHeader->parseTcpHeader(m_file,m_offset);
+                tcpHeader->parseTcpHeader(m_pFile,m_offset);
 
             if(ipVersion->getIPV4header()->Protocol==IPPROTO_UDP)
-                udpHeader->parseUdpHeader(m_file,m_offset);
+                udpHeader->parseUdpHeader(m_pFile,m_offset);
 
             writePacket();
         }
@@ -110,7 +144,7 @@ void CPcapManager ::parsePecapFile(){
 /**
 * Function       :  CPcapManager :: showLogs
 * Description    :  shows the logs of all classes
-* Arguments      :  void
+* Arguments      :  None
 * Return-type    :  void 
 */
 void CPcapManager:: showLogs(){
@@ -305,10 +339,10 @@ vector<string>* CPcapManager :: get_all_files_names_within_folder(string folder)
 
                 wstring ws(fd.cFileName);
                 string str(ws.begin(), ws.end());
-                m_filesInDir->push_back(str);
+                m_pFilesInDir->push_back(str);
             }
         }while(::FindNextFile(hFind, &fd)); 
         ::FindClose(hFind); 
     } 
-    return m_filesInDir;
+    return m_pFilesInDir;
 }
