@@ -5,6 +5,8 @@
 #include <Winsock.h>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
 using namespace std;
 
 
@@ -151,8 +153,10 @@ typedef struct sessionInfo {
         int Rx;
         int Tx;
         int packetCount;
+        std::vector<string> data;
         string transportProtocol;
-        sessionInfo(string cIP,string sIP,string sPort,string cPort,int x, int y,string protocol){
+
+        sessionInfo(string cIP,string sIP,string sPort,string cPort,int x, int y,string protocol,string packetData){
             clientIP=cIP;
             serverIP=sIP;
             clientPort=cPort;
@@ -160,7 +164,9 @@ typedef struct sessionInfo {
             Rx=x;
             Tx=y;
             packetCount=1;
-            transportProtocol =protocol;		
+            transportProtocol =protocol;
+            if(packetData != "")
+            data.push_back(packetData);
         }
     } m_session;
 

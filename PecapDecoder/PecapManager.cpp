@@ -5,6 +5,7 @@ CPcapManager::CPcapManager(){
     m_offset=0;
     m_sessionCounter=0;
     m_file= new fstream();
+    m_filesInDir = new vector<string>;
     m_layerOneParser= new CLayerOneParser();
     m_layerTwoParser= new CLayerTwoParser();
     m_layerThreeParser = new CLayerThreeParser();
@@ -19,17 +20,41 @@ CPcapManager::CPcapManager(){
 /**
 * Function         :   CPcapManager :: readPcapFile
 * Description      :   read the file from provide path 
-* Arguments        :   path of the file
+* Arguments        :   path of the file, output dir path
 * Return-type      :   void
 */
 
-void CPcapManager::readPcapFile(string path){
-    m_file->open(path, ios::in | ios::binary);
-    if( !m_file->is_open()) {
-        cout<<"Not able to read specified file"<<endl;
-        getchar();
+void CPcapManager::readPcapFile(string path,string outpath){
+    outputPath=outpath+"\\";
+    createOutputDir(outpath);
+    get_all_files_names_within_folder(path);
+    int count =1;
+    for (auto i = m_filesInDir->begin(); i != m_filesInDir->end(); ++i){
+        cout<<"\n\nReading file  : "<< count << endl<<endl;
+        cout<<"Current File Name : "<<*i<<endl;
+
+        string filePath = path+"\\"+ *i;
+        cout<<"\nPath of packet : "<<filePath<<endl;
+        m_file->open(filePath, ios::in | ios::binary);
+        if( !m_file->is_open()) {
+            cout<<"Not able to read specified file"<<endl;
+            getchar();
+        }else{
+            parsePecapFile();
+        }
+
+        m_file->close();count++;
+         dumpDataInFile();
     }
+
+    cout <<"\n\n  Done Reading Data \n\n"<<endl;
+  
     return;
+}
+void CPcapManager ::createOutputDir(string outpath){
+    std::wstring widestr = std::wstring(outpath.begin(), outpath.end());
+    CreateDirectory(widestr.c_str(), NULL);
+
 }
 
 /**
@@ -54,8 +79,14 @@ void CPcapManager ::parsePecapFile(){
         if(m_file->tellg() >= 0)
         {
             count++;
-            m_layerTwoParser->performLevelTwoParsing(m_file,& m_offset); 
-            m_layerThreeParser->performLevelThreeParsing(m_file,m_layerOneParser->getGlobalHeader()->linktype,&m_offset); 
+            m_layerTwoParser->performLevelTwoParsing(m_file,
+                &m_offset); 
+            
+            m_layerThreeParser->performLevelThreeParsing(
+                m_file,
+                m_layerOneParser->getGlobalHeader()->linktype,
+                &m_offset); 
+
             unsigned short frameType=m_layerThreeParser->getEtherHeader()->FrameType;
             if(frameType != 0xdd86)
                 ipVersion->parseIPV4Header(m_file);
@@ -71,13 +102,17 @@ void CPcapManager ::parsePecapFile(){
         }
 
     }
-    dumpDataInFile();
+
 
 }
 
 
-
-
+/**
+* Function       :  CPcapManager :: showLogs
+* Description    :  shows the logs of all classes
+* Arguments      :  void
+* Return-type    :  void 
+*/
 void CPcapManager:: showLogs(){
     m_layerOneParser->showLayerOneData();
     m_layerTwoParser->showLayerTwoData();
@@ -85,13 +120,14 @@ void CPcapManager:: showLogs(){
     ipVersion->showInternetVersionData();
 
 }
+
+
 /**
 * Function       :  CPcapManager :: convertToString
 * Description    :  Template type function convert the provide arugument into string
 * Arguments      :  Template type
 * Return-type    :  string 
 */
-
 
 template <class T>
 string  CPcapManager ::convertToString(T a){
@@ -115,7 +151,7 @@ string  CPcapManager ::convertToString(T a){
 */
 
 void CPcapManager :: writePacket(){
-
+     cout<<endl<<"Parsing pcap file  :"<<endl;
     if( (ipVersion != NULL) && 
         ( (ipVersion->getIPV4header()->Protocol == IPPROTO_TCP) || 
         ( ipVersion->getIPV4header()->Protocol==IPPROTO_UDP ) ))
@@ -158,6 +194,7 @@ void CPcapManager :: writePacket(){
         if(itr != m_sessionMap.end()){
             // cout<<"Key Available Updating information"<<endl;
             if(ipVersion->getIPV4header()->Protocol==IPPROTO_TCP){
+                itr->second.data.push_back(tcpHeader->getTcpData());
                 if(srcIP==itr->second.clientIP)
                     itr->second.Tx +=RxTx;          
                 else
@@ -174,12 +211,12 @@ void CPcapManager :: writePacket(){
         else{
             //   cout<<"Add new key to data haspmap" <<endl;
             if(tcpHeader->getTcpHeader()->th_flags == TH_SYN_ACK)  {           
-                m_session _sdetails (destIP,srcIP,destPort,srcPort,0,RxTx,protocol);
+                m_session _sdetails (destIP,srcIP,destPort,srcPort,0,RxTx,protocol,tcpHeader->getTcpData());
                 m_sessionMap.insert(std::pair<string,sessionInfo>(key, _sdetails));
             }
 
             else{
-                m_session _sdetails (srcIP,destIP,srcPort,destPort,RxTx,0,protocol);
+                m_session _sdetails (srcIP,destIP,srcPort,destPort,RxTx,0,protocol,"");
                 m_sessionMap.insert(std::pair<string,sessionInfo>(key, _sdetails));
                 if(tcpHeader->getTcpHeader()->th_flags == TH_RST ||tcpHeader->getTcpHeader()->th_flags== TH_FYN_AKW ){
                     writeAndRemoveSession(key);
@@ -188,7 +225,7 @@ void CPcapManager :: writePacket(){
 
         }
 
-    }
+    }// if( (ipVersion != NULL) && ...
 
 }
 /**
@@ -200,12 +237,13 @@ void CPcapManager :: writePacket(){
 */
 void CPcapManager :: dumpDataInFile(){
     int count=0;
+ 
+
     for (itr = m_sessionMap.begin(); itr != m_sessionMap.end(); itr++) 
     { 
         count++;
-        cout<<endl<<"Writing Session file  :"<<count<<" .."<<endl<<endl;
-
-        file.open (itr->first.c_str());
+        cout<<endl<<"Parsing pcap file  :"<<endl;
+        file.open ((outputPath+itr->first).c_str());
         file <<"Client IP : "<<itr->second.clientIP.c_str()<<endl;
         file <<"Server IP : "<<itr->second.serverIP.c_str()<<endl;
         file <<"Server Port : "<<itr->second.serverPort.c_str()<<endl;
@@ -214,17 +252,26 @@ void CPcapManager :: dumpDataInFile(){
         file <<"Tx  :  "<<itr->second.Tx<<endl;
         file <<"Number of packets in session : "<<itr->second.packetCount<<endl;
         file <<"Protocol  : "<<itr->second.transportProtocol.c_str()<<endl;
+        file<<"__________________________DATA_____________________________\n"<<endl;
+        for (int i=0; i<itr->second.data.size(); i++)     {
+           if(itr->second.data[i] !="")
+            file << itr->second.data[i] << "\n";
+         
+        } 
+      
         file.close();
-        m_sessionMap.erase(itr);
+        //m_sessionMap.erase(itr->first);
 
     }
-
+    m_sessionMap.clear();
 } 
 
 void  CPcapManager :: writeAndRemoveSession(string key){
+  
     auto itr = m_sessionMap.find(key);
+
     if(itr != m_sessionMap.end()){
-        file.open (itr->first.c_str());
+        file.open ((outputPath+key).c_str());
         file <<"Client IP : "<<itr->second.clientIP.c_str()<<endl;
         file <<"Server IP : "<<itr->second.serverIP.c_str()<<endl;
         file <<"Server Port : "<<itr->second.serverPort.c_str()<<endl;
@@ -233,8 +280,35 @@ void  CPcapManager :: writeAndRemoveSession(string key){
         file <<"Tx  :  "<<itr->second.Tx<<endl;
         file <<"Number of packets in session : "<<itr->second.packetCount<<endl;
         file <<"Protocol  : "<<itr->second.transportProtocol.c_str()<<endl;
+                file<<"__________________________DATA_____________________________"<<endl;
+        for (int i=0; i<itr->second.data.size(); i++)     {
+            file << itr->second.data[i] << "\n";
+        } 
+      
         file.close();
         m_sessionMap.erase(itr);
     }
 
+}
+
+vector<string>* CPcapManager :: get_all_files_names_within_folder(string folder){
+
+    string search_path = folder + "/*.pcap*";
+    WIN32_FIND_DATA fd; 
+    std::wstring widestr = std::wstring(search_path.begin(), search_path.end());
+    HANDLE hFind = :: FindFirstFile(widestr.c_str(), &fd); 
+    if(hFind != INVALID_HANDLE_VALUE) { 
+        do { 
+            // read all (real) files in current folder
+            // , delete '!' read other 2 default folder . and ..
+            if(! (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ) {
+
+                wstring ws(fd.cFileName);
+                string str(ws.begin(), ws.end());
+                m_filesInDir->push_back(str);
+            }
+        }while(::FindNextFile(hFind, &fd)); 
+        ::FindClose(hFind); 
+    } 
+    return m_filesInDir;
 }

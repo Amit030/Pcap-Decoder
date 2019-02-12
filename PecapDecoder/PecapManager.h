@@ -11,7 +11,7 @@
 #include<string>
 #include<sstream>
 #include <unordered_map> 
-
+#include <Windows.h>
 
 
 
@@ -23,14 +23,14 @@
 #define DELIMETER    "_"
 using namespace std;
 
-class CPcapManager{
+class CPcapManager{  
 
-  
     fstream *m_file;
     int m_offset;
-    int m_sessionCounter;
+    string outputPath;
+    int m_sessionCounter;  vector<string>* m_filesInDir;
     unordered_map<string, sessionInfo> m_sessionMap; 
-    unordered_map<std::string,sessionInfo>::const_iterator itr;
+    unordered_map<std::string, sessionInfo>::const_iterator itr;
     CLayerOneParser *m_layerOneParser;
     CLayerTwoParser *m_layerTwoParser;
     CLayerThreeParser *m_layerThreeParser;
@@ -44,15 +44,17 @@ class CPcapManager{
     void Test();
     void  writePacket();
     void dumpDataInFile();
+    void createOutputDir(string outpath);
     void  writeAndRemoveSession(string key);
     template <class T>
     string convertToString( T a);
     string generateKey();
+    vector<string>* get_all_files_names_within_folder(string folder);
+    void parsePecapFile();
 
 public:
     CPcapManager();
-    void readPcapFile(string path);
-    void parsePecapFile();
+    void readPcapFile(string path,string outpath);
     ~CPcapManager();
 
 };

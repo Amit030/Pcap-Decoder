@@ -19,14 +19,22 @@ using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[]){
 
-	string filePath ="D:\\InputMaven\\RAW\\1_0\\NewPacket.pcap";
+	string filePath ="D:\\ISC\\RAW";
 	CPcapManager *manager= new CPcapManager();
-	
-     manager->readPcapFile(filePath);
-	 manager->parsePecapFile();
-	
+    cout<<"------------------------------------------------------------\n";
+    cout<<"-------------------------PECAP DECODER----------------------\n";
+    cout<<"------------------------------------------------------------\n\n\n";
+   
+    string input,output;
+    cout<<"Please Enter the path of Source directory"<<endl;
+    getline(cin,input);
 
+     cout<<"Please Enter the path of Output directory"<<endl;
+    getline(cin,output);
+    
 	
+     manager->readPcapFile(input,output);
+	// manager->parsePecapFile();
 	getchar();
 	return 0;
 }
