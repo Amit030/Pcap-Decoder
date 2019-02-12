@@ -200,7 +200,7 @@ void CPcapManager :: writePacket(){
                 else
                     itr->second.Rx += RxTx;
             }else if(ipVersion->getIPV4header()->Protocol==IPPROTO_UDP){
-
+                itr->second.data.push_back(udpHeader->getUpdData());
                 if(srcIP==itr->second.clientIP)
                     itr->second.Tx += RxTx;       
                 else
@@ -216,10 +216,10 @@ void CPcapManager :: writePacket(){
             }
 
             else{
-                m_session _sdetails (srcIP,destIP,srcPort,destPort,RxTx,0,protocol,"");
+                m_session _sdetails (srcIP,destIP,srcPort,destPort,RxTx,0,protocol,udpHeader->getUpdData());
                 m_sessionMap.insert(std::pair<string,sessionInfo>(key, _sdetails));
                 if(tcpHeader->getTcpHeader()->th_flags == TH_RST ||tcpHeader->getTcpHeader()->th_flags== TH_FYN_AKW ){
-                    writeAndRemoveSession(key);
+                writeAndRemoveSession(key);
                 }
             }
 

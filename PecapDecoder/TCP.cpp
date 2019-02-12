@@ -13,10 +13,11 @@ void CTCP::parseTcpHeader(fstream *file,int totalLen){
         cout << "Exception opening/reading file";
     }
 
-     m_dataSize = totalLen - file->tellg();
- 
+    m_dataSize = totalLen - file->tellg();
+
     file->seekg((m_tcpHeader->HeaderLen >> 2)-sizeof(tcpHeader),ios::cur);
     parseTcpData(file);
+
 
 
 }
@@ -30,11 +31,11 @@ int  CTCP:: getDataSize(){
 
 string CTCP:: getTcpData(){
 
-   if(m_packData=="")
-       return "";
-   else{
-   return m_packData;
-   }
+    if(m_packData=="")
+        return "";
+    else{
+        return m_packData;
+    }
 }
 
 void CTCP:: showTcpData(){
@@ -51,7 +52,7 @@ void CTCP:: showTcpData(){
     cout<<"Window  : "<<ntohs(m_tcpHeader->Window)<<endl;
     cout<<"Checksum  : "<<m_tcpHeader->Checksum<<endl;
     cout<<"UrgentPointer : "<<m_tcpHeader->UrgentPointer<<endl;
-    
+
     cout<<"______________________________TCP FLAG________________________________"<<endl;
     switch(m_tcpHeader->th_flags){
     case TH_SYN:
@@ -64,12 +65,12 @@ void CTCP:: showTcpData(){
         cout<<"ACK FLHG"<<endl;
         break;
         case TH_FIN:
-        cout<<"TH_FIN"<<endl;
-        break;
+            cout<<"TH_FIN"<<endl;
+            break;
         case TH_SYN_ACK:
-        cout<<"TH_SYN_ACK"<<endl;
-        break;
-       
+            cout<<"TH_SYN_ACK"<<endl;
+            break;
+
 
     }
 
@@ -95,18 +96,30 @@ void  CTCP :: parseTcpData(fstream *file){
         std::string l_uaBuf;
         file->read(tempBuf,4);
         file->seekg(-4 , ios::cur);
-         char tcp_data_buf[1024];
-         memset(tcp_data_buf,0,sizeof(tcp_data_buf)/sizeof(char));
-           if ( ( tempBuf[0]==0x50 && tempBuf[1]==0x4f && tempBuf[2]==0x53 && tempBuf[3]==0x54 ) ||
-                        ( tempBuf[0]==0x47 && tempBuf[1]==0x45 && tempBuf[2]==0x54 )
-                        ) //Two conditions are "POST" and "GET", judge the success shows that the network frame contains a HTTP get or post links
-                    {
-                        file->read(tcp_data_buf,m_dataSize);
-                        m_packData = tcp_data_buf;
-    
-                    }
-    
-    
-    
+        char tcp_data_buf[2000];
+        memset(tcp_data_buf,0,sizeof(tcp_data_buf)/sizeof(char));
+
+        /*
+        *
+        *this statement will print the request only
+        */
+
+
+     /*   if ( ( tempBuf[0]==0x50 && tempBuf[1]==0x4f && tempBuf[2]==0x53 && tempBuf[3]==0x54 ) ||
+            ( tempBuf[0]==0x47 && tempBuf[1]==0x45 && tempBuf[2]==0x54 )
+            ) //Two conditions are "POST" and "GET", judge the success shows that the network frame contains a HTTP get or post links
+        {
+            file->read(tcp_data_buf,m_dataSize);
+            m_packData = tcp_data_buf;
+
+        }
+
+        */
+        file->read(tcp_data_buf,m_dataSize);
+            m_packData = tcp_data_buf;
     }
 }
+
+
+
+

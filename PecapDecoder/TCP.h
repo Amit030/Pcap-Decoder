@@ -12,15 +12,17 @@ class CTCP{
     int m_dataSize;
     string m_packData;
     void parseTcpData(fstream *file);
+    void print_payload(const u_char *payload, int len);
+    void print_hex_ascii_line(const u_char *payload, int len, int offset);
 public:
     CTCP();
-   void parseTcpHeader(fstream *file, int totalLen);
+    void parseTcpHeader(fstream *file, int totalLen);
     tcpHeader * getTcpHeader();
     void showTcpData();
     int getTcpHeaderLength();
-     int getDataSize();
-     string getTcpData();
-     void matchHttp();
+    int getDataSize();
+    string getTcpData();
+    void matchHttp();
     ~CTCP();
 
 

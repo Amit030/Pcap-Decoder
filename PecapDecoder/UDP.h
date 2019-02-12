@@ -8,12 +8,14 @@ class CUDP{
 
     updHeader *m_udpHeader;
     int m_dataSize;
+    string m_packData;
 public:
     CUDP();
    void  parseUdpHeader(fstream *file,int pos);
    updHeader* getUdpHeader();
-   void showUpdData();
+   string getUpdData();
    int getDataSize();
+   void  parseUdpData(fstream *file);
    ~CUDP();
 };
 
